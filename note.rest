@@ -1,0 +1,39 @@
+### CREATE A NOTE
+
+POST http://localhost:5000/note/new
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJndW5hd2FucyIsImZ1bGxOYW1lIjoiR3VuYXdhbiBTZXB0aWFuc3lhaCIsImlhdCI6MTc0MDgxMjg2NCwiZXhwIjoxNzQwODE2NDY0fQ.RNKx0kVbMchkU5SHRCyV5a8A6bAMr1bgKNXCcB61LX4
+Content-Type: application/json
+
+{
+    "noteTitle": "Alamat tanah",
+    "noteContent": "Jalan Pasundan No. 98 RT/W 09/21."
+}
+
+### EDIT NOTE
+
+PUT http://localhost:5000/note/edit/5
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJnZXRXZWxsU29vbiIsImZ1bGxOYW1lIjoiR3VuYXdhbiBTZXB0aWFkaSIsImlhdCI6MTc0MDYzNDU4MywiZXhwIjoxNzQwNjM4MTgzfQ.PnfQQ09UklWT6nUGPz9QBSriyUR5GmdY8hIprcFbHKI
+Content-Type: application/json
+
+{
+    "noteTitle": "Nomor Guru Adek",
+    "noteContent": "Pak Ogah (yang botak) 0879635272635. Pak Unyil (yang pake peci) 0873645726356."
+}
+
+### FETCH A NOTE
+
+GET http://localhost:5000/note/get/16
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJndW5hd2FucyIsImZ1bGxOYW1lIjoiR3VuYXdhbiBTZXB0aWFuc3lhaCIsImlhdCI6MTc0MDgxMjg2NCwiZXhwIjoxNzQwODE2NDY0fQ.RNKx0kVbMchkU5SHRCyV5a8A6bAMr1bgKNXCcB61LX4
+Content-Type: application/json
+
+### GET ALL NOTES
+
+GET http://localhost:5000/note/all
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJnZXRXZWxsU29vbiIsImZ1bGxOYW1lIjoiR3VuYXdhbiBTZXB0aWFkaSIsImlhdCI6MTc0MDYzNDU4MywiZXhwIjoxNzQwNjM4MTgzfQ.PnfQQ09UklWT6nUGPz9QBSriyUR5GmdY8hIprcFbHKI
+Content-Type: application/json
+
+### DELETE A NOTE
+
+DELETE http://localhost:5000/note/delete/4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJnZXRXZWxsU29vbiIsImZ1bGxOYW1lIjoiR3VuYXdhbiBTZXB0aWFkaSIsImlhdCI6MTc0MDYzNDU4MywiZXhwIjoxNzQwNjM4MTgzfQ.PnfQQ09UklWT6nUGPz9QBSriyUR5GmdY8hIprcFbHKI
+Content-Type: application/json
