@@ -1,59 +1,42 @@
 const express = require('express');
-const app = express();
+const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
-//import router
-const userRouter = require("./routes/user");
-const noteRouter = require("./routes/note");
+const app = express();
 
-//middleware untuk parse JSON
+// Middleware
+app.use(cors({
+  origin: '*',
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// user router
+// Import routers
+const userRouter = require("./routes/user");
+const noteRouter = require("./routes/note");
+
+// Routes
 app.use(userRouter);
-// note router
 app.use(noteRouter);
 
-// konfigurasi CORS
-app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE, PATCH");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-  next();
+// Default root route
+app.get('/', (req, res) => {
+  res.json({ message: "Hello from backend service" });
 });
 
-// default route
-app.get("/", (req, res, next) => {
-  try {
-    res.json({
-      message: "Hello from another service"
-    });
-  } catch (error) {
-    console.log(error);
-  }
-});
-
-// dbAssoc.js
+// Database associations
 const association = require('./utils/dbAssoc');
 
-const port = process.env.PORT;
+// Start server
+const PORT = process.env.PORT || 5000;
 
 association()
   .then(() => {
-    app.listen(port, () => {
-      console.log('connected to db and server is running on port', port);
+    app.listen(PORT, () => {
+      console.log(`Connected to DB and server is running on port ${PORT}`);
     });
   })
   .catch((err) => {
-    console.log(err.message);
+    console.error('Failed to start server:', err.message);
   });
-
-  // serve static files dari folder client
-app.use(express.static(path.join(__dirname, '../client')));
-
-// route untuk halaman login
-app.get('/user/login', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/pages/login.html'));
-});
