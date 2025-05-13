@@ -1,26 +1,28 @@
-const express = require("express");
+import express from 'express';
 const router = express.Router();
-const {
-    createNote, 
+import verifyToken from '../middlewares/verifyToken.js';
+
+import {
+    createNote,
     getNoteById,
     deleteNote,
     getAllNotes,
-    editNote
-} = require("../controllers/note");
+    updateNote
+} from '../controllers/note.js';
 
-// create a note
-router.post('/note/new', createNote);
+// CREATE NEW NOTE (protected)
+router.post('/new', verifyToken, createNote);
 
-// fetch a note by ID
-router.get('/note/get/:noteId', getNoteById);
+// GET ALL NOTES FOR USER (protected)
+router.get('/all', verifyToken, getAllNotes);
 
-// fetch notes preview
-router.get('/note/all', getAllNotes);
+// GET NOTE BY ID (protected)
+router.get('/:noteId', verifyToken, getNoteById);
 
-// edit a note
-router.put('/note/edit/:noteId', editNote);
+// UPDATE NOTE (protected)
+router.put('/:noteId', verifyToken, updateNote);
 
-// delete a note
-router.delete('/note/delete/:noteId', deleteNote);
+// DELETE NOTE (protected)
+router.delete('/:noteId', verifyToken, deleteNote);
 
-module.exports = router;
+export default router;

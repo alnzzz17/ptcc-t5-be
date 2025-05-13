@@ -1,22 +1,27 @@
-const express = require("express");
+import express from 'express';
 const router = express.Router();
-const {
+import verifyToken from '../middlewares/verifyToken.js';
+import {
     postUser,
     deleteUser,
     loginHandler,
-    editUser
-} = require("../controllers/user");
+    editUser,
+    logoutHandler
+} from '../controllers/user.js';
 
 // REGISTER NEW USER (EVERYBODY CAN SIGN UP)
-router.post('/user/register', postUser);
+router.post('/register', postUser);
 
 // USER LOGIN
-router.post('/user/login', loginHandler);
+router.post('/login', loginHandler);
+
+// USER LOGOUT
+router.post('/logout', verifyToken, logoutHandler);
 
 // DELETE USER ACCOUNT
-router.delete('/user/delete/:id', deleteUser);
+router.delete('/delete/:id', verifyToken, deleteUser);
 
 // EDIT USER ACCOUNT
-router.put('/user/edit/', editUser);
+router.put('/edit', verifyToken, editUser);
 
-module.exports = router;
+export default router;

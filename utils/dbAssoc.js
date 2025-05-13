@@ -1,16 +1,19 @@
-const sequelize = require("./dbConnect");
-const User = require('../models/User');
-const Note = require('../models/Note');
+import sequelize from "./dbConnect.js";
+import User from '../models/User.js';
+import Note from '../models/Note.js';
 
-User.hasMany(Note, { foreignKey: 'userId'});
-Note.belongsTo(User, { foreignKey: 'userId'});
+// Relasi
+User.hasMany(Note, { foreignKey: 'userId' });
+Note.belongsTo(User, { foreignKey: 'userId' });
 
-const association = async()=>{
+// Fungsi sinkronisasi database
+const association = async () => {
   try {
-    await sequelize.sync({force: false});
+    await sequelize.sync({ force: false });
+    console.log('Database & tables synced!');
   } catch (error) {
-    console.log(error.message);
+    console.error('Failed to sync database:', error.message);
   }
-}
+};
 
-module.exports = association; 
+export default association;

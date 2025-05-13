@@ -1,173 +1,187 @@
-const Note = require("../models/Note");
-const jwt = require("jsonwebtoken");
-require("dotenv").config();
+import Note from "../models/Note.js";
+import User from "../models/User.js";
 
-// TOKEN VERIFICATION
-const verifyToken = (req) => {
-    const authorization = req.headers.authorization;
-    if (!authorization || !authorization.startsWith("Bearer ")) {
-        throw new Error("You need to login");
-    }
-
-    const token = authorization.substring(7);
-    return jwt.verify(token, process.env.TOKEN_SECRET_KEY);
-};
-
-// NEW NOTE - TESTED
+// NEW NOTE
 const createNote = async (req, res) => {
     try {
-        const decoded = verifyToken(req);
-
         const { noteTitle, noteContent } = req.body;
+        const userId = req.user.id; // From verifyToken middleware
 
-        // membuat note baru dengan user yang login
+        // Validate required fields
+        if (!noteTitle) {
+            return res.status(400).json({
+                status: "error",
+                message: "Note title is required"
+            });
+        }
+
+        // Create new note
         const newNote = await Note.create({
-            userId: decoded.id,
+            userId,
             noteTitle,
             noteContent
         });
 
         res.status(201).json({
             status: "success",
-            message: "Note created successfully!",
+            message: "Note created successfully",
             data: newNote
         });
     } catch (error) {
-        res.status(500).json({ status: "error", message: error.message });
+        res.status(500).json({
+            status: "error",
+            message: error.message
+        });
     }
 };
 
-// NOTE DETAILS - TESTED
+// GET NOTE BY ID
 const getNoteById = async (req, res) => {
     try {
-        const decoded = verifyToken(req);
+        const { noteId } = req.params;
+        const userId = req.user.id;
 
-        // mengambil note berdasarkan id dan user yang login
+        // Find note with user verification
         const note = await Note.findOne({
             where: { 
-                id: req.params.noteId, 
-                userId: decoded.id 
+                id: noteId,
+                userId 
             },
-            attributes: [
-                "id", 
-                "noteTitle", 
-                "noteContent", 
-                "createdAt", 
-                "updatedAt"]
+            include: [{
+                model: User,
+                attributes: ['id', 'username']
+            }],
+            attributes: ['id', 'noteTitle', 'noteContent', 'createdAt', 'updatedAt']
         });
 
         if (!note) {
             return res.status(404).json({
                 status: "error",
-                message: "Note not found."
+                message: "Note not found or you don't have access"
             });
         }
 
-        res.status(200).json({ status: "success", data: note });
+        res.status(200).json({
+            status: "success",
+            data: note
+        });
     } catch (error) {
-        res.status(500).json({ status: "error", message: error.message });
+        res.status(500).json({
+            status: "error",
+            message: error.message
+        });
     }
 };
 
-// DELETE NOTE - TESTED
-const deleteNote = async (req, res) => {
+// GET ALL NOTES FOR USER
+const getAllNotes = async (req, res) => {
     try {
-        const decoded = verifyToken(req);
+        const userId = req.user.id;
 
-        // cari note berdasarkan id
-        const note = await Note.findByPk(req.params.noteId);
+        const notes = await Note.findAll({
+            where: { userId },
+            include: [{
+                model: User,
+                attributes: ['id', 'username']
+            }],
+            attributes: ['id', 'noteTitle', 'createdAt'],
+            order: [['createdAt', 'DESC']]
+        });
 
-        // jika note tidak ditemukan, kembalikan error 404
+        res.status(200).json({
+            status: "success",
+            results: notes.length,
+            data: notes
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: error.message
+        });
+    }
+};
+
+// UPDATE NOTE
+const updateNote = async (req, res) => {
+    try {
+        const { noteId } = req.params;
+        const userId = req.user.id;
+        const { noteTitle, noteContent } = req.body;
+
+        // Find the note
+        const note = await Note.findOne({
+            where: { 
+                id: noteId,
+                userId 
+            }
+        });
+
         if (!note) {
             return res.status(404).json({
                 status: "error",
-                message: "Note not found."
+                message: "Note not found or you don't have access"
             });
         }
 
-        // pastikan user yang menghapus adalah pemilik note
-        if (note.userId !== decoded.id) {
-            return res.status(403).json({
+        // Update note
+        const updatedNote = await note.update({
+            noteTitle: noteTitle || note.noteTitle,
+            noteContent: noteContent || note.noteContent
+        });
+
+        res.status(200).json({
+            status: "success",
+            message: "Note updated successfully",
+            data: updatedNote
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: error.message
+        });
+    }
+};
+
+// DELETE NOTE
+const deleteNote = async (req, res) => {
+    try {
+        const { noteId } = req.params;
+        const userId = req.user.id;
+
+        // Find the note
+        const note = await Note.findOne({
+            where: { 
+                id: noteId,
+                userId 
+            }
+        });
+
+        if (!note) {
+            return res.status(404).json({
                 status: "error",
-                message: "Unauthorized to delete this note."
+                message: "Note not found or you don't have access"
             });
         }
 
-        // hapus note
+        // Delete note
         await note.destroy();
 
         res.status(200).json({
             status: "success",
-            message: "Note deleted successfully.",
-            deletedNote: {
-                id: note.id,
-                noteTitle: note.noteTitle,
-                noteContent: note.noteContent
-            }
+            message: "Note deleted successfully"
         });
-
     } catch (error) {
-        res.status(500).json({ status: "error", message: error.message });
+        res.status(500).json({
+            status: "error",
+            message: error.message
+        });
     }
 };
 
-
-// FETCH ALL NOTE - TESTED
-const getAllNotes = async (req, res) => {
-    try {
-        const decoded = verifyToken(req);
-
-        // ambil semua note milik user yang login
-        const notes = await Note.findAll({
-            where: { userId: decoded.id },
-            attributes: ["id", "noteTitle", "noteContent", "createdAt"]
-        });
-
-        res.status(200).json({
-            status: "success",
-            total: notes.length,
-            data: notes
-        });
-    } catch (error) {
-        res.status(500).json({ status: "error", message: error.message });
-    }
-};
-
-// EDIT NOTE - TESTED
-const editNote = async (req, res) => {
-    try {
-        const decoded = verifyToken(req);
-        const userId = decoded.id;
-        const { noteTitle, noteContent } = req.body;
-        const noteId = req.params.noteId;
-
-        // pastikan hanya mengedit note yang dimiliki oleh user yang login
-        const note = await Note.findOne({
-            where: { id: noteId, userId: userId } // filter berdasarkan noteId dan userId
-        });
-
-        if (!note) {
-            return res.status(403).json({ status: "error", message: "Unauthorized to edit this note." });
-        }
-
-        // update note
-        const editedNote = await note.update({ noteTitle, noteContent });
-
-        res.status(200).json({ 
-            status: "success", 
-            message: "Note updated successfully", 
-            data: editedNote 
-        });
-    } catch (error) {
-        res.status(500).json({ status: "error", message: error.message });
-    }
-};
-
-
-module.exports = {
+export {
     createNote,
     getNoteById,
-    deleteNote,
     getAllNotes,
-    editNote
+    updateNote,
+    deleteNote
 };

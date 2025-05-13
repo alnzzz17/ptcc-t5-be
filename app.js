@@ -1,42 +1,75 @@
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-require('dotenv').config();
-
+import dotenv from 'dotenv';
+dotenv.config();
+import express from 'express';
 const app = express();
+import path from 'path';
+import { fileURLToPath } from 'url';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
+
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Middleware
-app.use(cors({
-  origin: '*',
-}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-// Import routers
-const userRouter = require("./routes/user");
-const noteRouter = require("./routes/note");
+// Enhanced CORS Configuration
+app.use(cors({
+    origin: process.env.CLIENT_URL || 'http://localhost:5000',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-csrf-token'],
+    exposedHeaders: ['*', 'Authorization']
+}));
 
-// Routes
-app.use(userRouter);
-app.use(noteRouter);
+// Handle Preflight (OPTIONS)
+app.options('*', cors());
 
-// Default root route
+// Import Routers
+import userRouter from "./routes/user.js";
+import noteRouter from "./routes/note.js";
+
+// Mount Routers
+app.use("/api/user", userRouter);
+app.use("/api/notes", noteRouter);
+
+// Default route
 app.get('/', (req, res) => {
-  res.json({ message: "Hello from backend service" });
+    res.json({ message: "Hello from backend service" });
 });
 
-// Database associations
-const association = require('./utils/dbAssoc');
+// Error Handling Middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ 
+        status: "error",
+        message: "Internal Server Error" 
+    });
+});
 
-// Start server
+// 404 Handler
+app.use((req, res) => {
+    res.status(404).json({ 
+        status: "error",
+        message: "Endpoint not found" 
+    });
+});
+
+// Database associations and server start
+import association from './utils/dbAssoc.js';
 const PORT = process.env.PORT || 5000;
 
 association()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Connected to DB and server is running on port ${PORT}`);
+    .then(() => {
+        app.listen(PORT, () => {
+            console.log(`Connected to DB and server is running on port ${PORT}`);
+            console.log(`Client URL: ${process.env.CLIENT_URL || 'http://localhost:5000'}`);
+        });
+    })
+    .catch((err) => {
+        console.error('Failed to start server:', err.message);
+        process.exit(1);
     });
-  })
-  .catch((err) => {
-    console.error('Failed to start server:', err.message);
-  });

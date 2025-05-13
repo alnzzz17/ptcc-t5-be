@@ -1,5 +1,5 @@
-const sequelize = require("../utils/dbConnect");
-const Sequelize = require('sequelize');
+import { Sequelize } from 'sequelize';
+import sequelize from "../utils/dbConnect.js";
 
 const User = sequelize.define('user', {
     id: {
@@ -24,4 +24,4 @@ const User = sequelize.define('user', {
     timestamps: true
 });
 
-module.exports = User;
+export default User;

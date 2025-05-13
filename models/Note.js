@@ -1,35 +1,33 @@
-const sequelize = require("../utils/dbConnect");
-const Sequelize = require("sequelize");
-const User = require("./User");
+import { Sequelize } from "sequelize";
+import sequelize from "../utils/dbConnect.js";
+import User from "./User.js";
 
 const Note = sequelize.define('note', {
-        id: {
-            type: Sequelize.INTEGER,
-            primaryKey: true,
-            allowNull: false,
-            autoIncrement: true,
-        },
-        userId: {
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            references: {
-                model: User,
-                key: "id",
-            },
-            onDelete: "CASCADE",
-        },
-        noteTitle: {
-            type: Sequelize.STRING,
-            allowNull: false,
-        },
-        noteContent: {
-            type: Sequelize.TEXT,
-            allowNull: true,
-        }
+    id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        allowNull: false,
+        autoIncrement: true,
     },
-    {
-        timestamps: true
+    userId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+            model: User,
+            key: "id",
+        },
+        onDelete: "CASCADE",
+    },
+    noteTitle: {
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
+    noteContent: {
+        type: Sequelize.TEXT,
+        allowNull: true,
     }
-);
+}, {
+    timestamps: true
+});
 
-module.exports = Note;
+export default Note;
