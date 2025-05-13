@@ -47,7 +47,7 @@ const postUser = async (req, res) => {
 
         // Set refresh token in cookie
         res.cookie("refreshToken", refreshToken, {
-            httpOnly: false,
+            httpOnly: true,
             sameSite: "none",
             secure: true,
             maxAge: 24 * 60 * 60 * 1000,
@@ -111,7 +111,7 @@ const loginHandler = async (req, res) => {
 
         // Set refresh token in cookie
         res.cookie("refreshToken", refreshToken, {
-            httpOnly: false,
+            httpOnly: true,
             sameSite: "none",
             secure: true,
             maxAge: 24 * 60 * 60 * 1000,
