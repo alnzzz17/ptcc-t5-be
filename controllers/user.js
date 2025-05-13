@@ -48,7 +48,7 @@ const postUser = async (req, res) => {
         // Set refresh token in cookie
         res.cookie("refreshToken", refreshToken, {
             httpOnly: false,
-            sameSite: "lax",
+            sameSite: "none",
             secure: true,
             maxAge: 24 * 60 * 60 * 1000,
         });
@@ -56,7 +56,7 @@ const postUser = async (req, res) => {
         res.status(201).json({
             status: "success",
             message: "User registered successfully",
-            data: { id: newUser.id, username: newUser.username },
+            data: { id: newUser.id, username: newUser.username, fullName: newUser.fullName  },
             accessToken,
         });
     } catch (error) {
@@ -112,7 +112,7 @@ const loginHandler = async (req, res) => {
         // Set refresh token in cookie
         res.cookie("refreshToken", refreshToken, {
             httpOnly: false,
-            sameSite: "lax",
+            sameSite: "none",
             secure: true,
             maxAge: 24 * 60 * 60 * 1000,
         });
