@@ -21,9 +21,12 @@ app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:5000',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-csrf-token'],
-  exposedHeaders: ['*', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Authorization']
 }));
+
+// Pastikan OPTIONS request dihandle dengan benar
+app.options('*', cors());
 
 // Handle Preflight (OPTIONS)
 app.options('*', cors());
