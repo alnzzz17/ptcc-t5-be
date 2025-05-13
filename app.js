@@ -9,6 +9,7 @@ import cors from 'cors';
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Middleware
 app.use(express.json());
@@ -17,7 +18,7 @@ app.use(cookieParser());
 
 // CORS Configuration
 app.use(cors({
-  origin: "https://backend-377407893329.us-central1.run.app"|| 'http://localhost:5000',
+  origin: process.env.CLIENT_URL || 'http://localhost:5000',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -65,7 +66,7 @@ association()
     .then(() => {
         app.listen(PORT, () => {
             console.log(`Connected to DB and server is running on port ${PORT}`);
-            console.log(`Client URL: ${'https://backend-377407893329.us-central1.run.app' || 'http://localhost:5000'}`);
+            console.log(`Client URL: ${process.env.CLIENT_URL || 'http://localhost:5000'}`);
         });
     })
     .catch((err) => {
