@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 
-export const refreshToken = async (req, res) => {
+const refreshToken = async (req, res) => {
     try {
         const refreshToken = req.cookies.refreshToken;
         console.log({ refreshToken })
@@ -29,3 +29,5 @@ export const refreshToken = async (req, res) => {
         console.log(error);
     }
 }
+
+export default refreshToken;

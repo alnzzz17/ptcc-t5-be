@@ -1,6 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import verifyToken from '../middlewares/verifyToken.js';
+import refreshToken from "../controllers/refreshToken.js";
 import {
     postUser,
     deleteUser,
@@ -8,6 +9,9 @@ import {
     editUser,
     logoutHandler
 } from '../controllers/user.js';
+
+// ENDPOINT TOKEN REFRESH
+router.get('/refresh', refreshToken);
 
 // REGISTER NEW USER (EVERYBODY CAN SIGN UP)
 router.post('/register', postUser);
