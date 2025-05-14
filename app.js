@@ -2,8 +2,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
 const app = express();
-import path from 'path';
-import { fileURLToPath } from 'url';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
