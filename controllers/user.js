@@ -213,18 +213,9 @@ const deleteUser = async (req, res) => {
 // EDIT USER ACCOUNT - TESTED
 const editUser = async (req, res) => {
     try {
-        const { id } = req.params;
         const loggedInUserId = req.user.id; // From verifyToken middleware
-
-        // Memastikan user yang ingin diupdate adalah user yang sedang login
-        if (parseInt(id) !== loggedInUserId) {
-            return res.status(403).json({
-                status: "error",
-                message: "Forbidden: You can only edit your own account",
-            });
-        }
-
-        const userToUpdate = await User.findByPk(id);
+        const userToUpdate = await User.findByPk(loggedInUserId);
+        
         if (!userToUpdate) {
             return res.status(404).json({
                 status: "error",
@@ -243,7 +234,7 @@ const editUser = async (req, res) => {
 
         await userToUpdate.update(updatedFields);
 
-        const updatedUser = await User.findByPk(id, {
+        const updatedUser = await User.findByPk(loggedInUserId, {
             attributes: ["id", "username", "fullName"],
         });
 
