@@ -10,11 +10,9 @@ const refreshToken = async (req, res) => {
         if (!refreshToken) return res.sendStatus(401);
         console.log("sudah lewat 401 di authcontroller")
         const user = await User.findOne({
-            where: {
                 where: { refreshToken }
-            }
         });
-        if (!user.refresh_token) return res.sendStatus(403);
+        if (!user.refreshToken) return res.sendStatus(403);
         else jwt.verify(refreshToken, process.env.REFRESH_SECRET_KEY, (err, decoded) => {
             if (err) return res.sendStatus(403);
             console.log("sudah lewat 403 ke dua di controller")
