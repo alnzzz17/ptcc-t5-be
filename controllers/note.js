@@ -84,7 +84,7 @@ const getAllNotes = async (req, res) => {
                 model: User,
                 attributes: ['id', 'username']
             }],
-            attributes: ['id', 'noteTitle', 'createdAt'],
+            attributes: ['id', 'noteTitle', 'noteContent', 'createdAt'],
             order: [['createdAt', 'DESC']]
         });
 
