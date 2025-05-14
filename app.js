@@ -12,7 +12,7 @@ app.use(cookieParser());
 
 // CORS Configuration
 app.use(cors({
-  origin: process.env.CLIENT_URL,
+  origin: 'https://app-t6-dot-a-11-450504.uc.r.appspot.com',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -60,7 +60,7 @@ association()
     .then(() => {
         app.listen(PORT, () => {
             console.log(`Connected to DB and server is running on port ${PORT}`);
-            console.log(`Client URL: ${process.env.CLIENT_URL || 'http://localhost:5000'}`);
+            console.log(`'https://app-t6-dot-a-11-450504.uc.r.appspot.com' || 'http://localhost:5000'}`);
         });
     })
     .catch((err) => {
