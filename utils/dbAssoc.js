@@ -9,7 +9,7 @@ Note.belongsTo(User, { foreignKey: 'userId' });
 // Fungsi sinkronisasi database
 const association = async () => {
   try {
-    await sequelize.sync({ force: false });
+    await sequelize.sync({ force: true });
     console.log('Database & tables synced!');
   } catch (error) {
     console.error('Failed to sync database:', error.message);

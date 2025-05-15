@@ -19,6 +19,10 @@ const User = sequelize.define('user', {
     fullName: {
         type: Sequelize.STRING,
         allowNull: false
+    },
+    refreshToken: {
+        type: Sequelize.STRING,
+        allowNull: true
     }
 }, {
     timestamps: true
