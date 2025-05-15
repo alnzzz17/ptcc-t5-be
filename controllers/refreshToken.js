@@ -17,7 +17,7 @@ const refreshToken = async (req, res) => {
             if (err) return res.sendStatus(403);
             console.log("sudah lewat 403 ke dua di controller")
             const userPlain = user.toJSON(); // Konversi ke object
-            const { password: _, refresh_token: __, ...safeUserData } = userPlain;
+            const { password: _, refreshToken: __, ...safeUserData } = userPlain;
             const accessToken = jwt.sign(safeUserData, process.env.ACCESS_SECRET_KEY, {
                 expiresIn: '30s'
             });
