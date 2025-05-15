@@ -21,7 +21,7 @@ const User = sequelize.define('user', {
         allowNull: false
     },
     refreshToken: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         allowNull: true
     }
 }, {
