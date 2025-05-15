@@ -4,10 +4,10 @@ import User from "../models/User.js";
 // NEW NOTE
 const createNote = async (req, res) => {
     try {
-        const { noteTitle, noteContent } = req.body;
-        const userId = req.user.id; // From verifyToken middleware
+        const { noteTitle, noteContent } = req.body; // noteTitle dan noteContent dari req body
+        const userId = req.user.id; // userId dari middleware verifyToken
 
-        // Validate required fields
+        // Validasi field noteTitle
         if (!noteTitle) {
             return res.status(400).json({
                 status: "error",
@@ -38,22 +38,23 @@ const createNote = async (req, res) => {
 // GET NOTE BY ID
 const getNoteById = async (req, res) => {
     try {
-        const { noteId } = req.params;
-        const userId = req.user.id;
+        const { noteId } = req.params; // noteId dari params
+        const userId = req.user.id; // userId dari middleware verifyToken
 
-        // Find note with user verification
+        // Cari note berdasarkan noteId dan userId
         const note = await Note.findOne({
             where: { 
                 id: noteId,
                 userId 
             },
             include: [{
-                model: User,
+                model: User, // Dari tabel User
                 attributes: ['id', 'username']
             }],
             attributes: ['id', 'noteTitle', 'noteContent', 'createdAt', 'updatedAt']
         });
 
+        // Mengembalikan error jika note tidak ditemukan atau user tidak memiliki akses
         if (!note) {
             return res.status(404).json({
                 status: "error",
@@ -73,19 +74,19 @@ const getNoteById = async (req, res) => {
     }
 };
 
-// GET ALL NOTES FOR USER
+// GET ALL NOTES BY USER
 const getAllNotes = async (req, res) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user.id; // userId dari middleware verifyToken
 
         const notes = await Note.findAll({
             where: { userId },
             include: [{
-                model: User,
+                model: User, // Dari tabel User
                 attributes: ['id', 'username']
             }],
             attributes: ['id', 'noteTitle', 'noteContent', 'createdAt'],
-            order: [['createdAt', 'DESC']]
+            order: [['createdAt', 'DESC']] // Diurutkan berdasarkan waktu dibuat secara descending
         });
 
         res.status(200).json({
@@ -104,11 +105,11 @@ const getAllNotes = async (req, res) => {
 // UPDATE NOTE
 const updateNote = async (req, res) => {
     try {
-        const { noteId } = req.params;
-        const userId = req.user.id;
-        const { noteTitle, noteContent } = req.body;
+        const { noteId } = req.params; // noteId dari params
+        const userId = req.user.id; // userId dari middleware verifyToken
+        const { noteTitle, noteContent } = req.body; // noteTitle dan noteContent dari req body
 
-        // Find the note
+        // Cari note berdasarkan noteId dan userId
         const note = await Note.findOne({
             where: { 
                 id: noteId,
@@ -116,6 +117,7 @@ const updateNote = async (req, res) => {
             }
         });
 
+        // Mengembalikan error jika note tidak ditemukan atau user tidak memiliki akses
         if (!note) {
             return res.status(404).json({
                 status: "error",
@@ -125,8 +127,8 @@ const updateNote = async (req, res) => {
 
         // Update note
         const updatedNote = await note.update({
-            noteTitle: noteTitle || note.noteTitle,
-            noteContent: noteContent || note.noteContent
+            noteTitle: noteTitle || note.noteTitle, // Jika noteTitle tidak ada di body, gunakan yang lama
+            noteContent: noteContent || note.noteContent // Jika noteContent tidak ada di body, gunakan yang lama   
         });
 
         res.status(200).json({
@@ -145,10 +147,10 @@ const updateNote = async (req, res) => {
 // DELETE NOTE
 const deleteNote = async (req, res) => {
     try {
-        const { noteId } = req.params;
-        const userId = req.user.id;
+        const { noteId } = req.params; // noteId dari params
+        const userId = req.user.id; // userId dari middleware verifyToken
 
-        // Find the note
+        // Cari note berdasarkan noteId dan userId
         const note = await Note.findOne({
             where: { 
                 id: noteId,
@@ -156,6 +158,7 @@ const deleteNote = async (req, res) => {
             }
         });
 
+        // Mengembalikan error jika note tidak ditemukan atau user tidak memiliki akses
         if (!note) {
             return res.status(404).json({
                 status: "error",

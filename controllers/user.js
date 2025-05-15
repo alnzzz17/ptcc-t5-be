@@ -4,17 +4,18 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-// REGISTER NEW USER - TESTED
+// REGISTER NEW USER
 const postUser = async (req, res) => {
     try {
-        const { username, password, fullName } = req.body;
+        const { username, password, fullName } = req.body; // Ambil data dari req body
 
-        // hash password
+        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // periksa apakah user sudah ada
+        // Periksa apakah user sudah ada berdasarkan username
         const existingUser = await User.findOne({ where: { username } });
 
+        // Jika user sudah ada, kirimkan error
         if (existingUser) {
             return res.status(400).json({
                 status: "error",
@@ -22,56 +23,62 @@ const postUser = async (req, res) => {
             });
         }
 
-        // create user baru
+        // Create new user
         const newUser = await User.create({
             username,
             password: hashedPassword,
             fullName,
         });
 
-        // generate jwt tokens
+        // Generate accessToken dengan userId dan username
         const accessToken = jwt.sign(
             { userId: newUser.id, username: newUser.username },
             process.env.ACCESS_SECRET_KEY,
             { expiresIn: "30m" }
         );
 
+        // Generate refreshToken dengan userId dan username
         const refreshToken = jwt.sign(
             { userId: newUser.id, username: newUser.username },
             process.env.REFRESH_SECRET_KEY,
             { expiresIn: "1d" }
         );
 
-        // Update refresh token in database
+        // Update refreshToken di database
         await User.update({ refreshToken }, { where: { id: newUser.id } });
 
-        // Set refresh token in cookie
+        // Set refreshToken di cookie
         res.cookie("refreshToken", refreshToken, {
-            httpOnly: true,
-            sameSite: "none",
-            secure: true,
+            httpOnly: true, // Hanya dapat diakses oleh server
+            sameSite: "none", // Untuk cross-site request
+            secure: true, // Hanya untuk HTTPS
             maxAge: 24 * 60 * 60 * 1000,
         });
 
         res.status(201).json({
             status: "success",
             message: "User registered successfully",
-            data: { id: newUser.id, username: newUser.username, fullName: newUser.fullName  },
-            accessToken,
+            data: {
+                id: newUser.id,
+                username: newUser.username,
+                fullName: newUser.fullName
+            },
+            accessToken, // Kirimkan access token ke client
         });
     } catch (error) {
         res.status(500).json({ status: "error", message: error.message });
     }
 };
 
-// USER LOGIN - TESTED
+// USER LOGIN
 const loginHandler = async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { username, password } = req.body; // Ambil data dari req body
 
-        // periksa apakah user sudah ada
+        // Periksa apakah user sudah ada beerasarkan username
         const user = await User.findOne({ where: { username } });
 
+        // Mengirimkan error jika user tidak ditemukan
         if (!user) {
             return res.status(404).json({
                 status: "error",
@@ -79,9 +86,10 @@ const loginHandler = async (req, res) => {
             });
         }
 
-        // validasi password
+        // Validasi password
         const isPasswordValid = await bcrypt.compare(password, user.password);
 
+        // Mengirimkan error jika password tidak valid
         if (!isPasswordValid) {
             return res.status(401).json({
                 status: "error",
@@ -89,31 +97,35 @@ const loginHandler = async (req, res) => {
             });
         }
 
-        // Convert user to plain object
+        // Konversi user ke plain object
         const userPlain = user.toJSON();
+
+        // Membuat objek baru (safeUserData) yang berisi semua properti dari userPlain
+        // kecuali 'password' dan 'refreshToken'
         const { password: _, refreshToken: __, ...safeUserData } = userPlain;
 
-        // generate jwt tokens
+        // Generate accessToken safeUserData
         const accessToken = jwt.sign(
             safeUserData,
             process.env.ACCESS_SECRET_KEY,
             { expiresIn: "30m" }
         );
 
+        // Generate refreshToken dengan safeUserData
         const refreshToken = jwt.sign(
             safeUserData,
             process.env.REFRESH_SECRET_KEY,
             { expiresIn: "1d" }
         );
 
-        // Update refresh token in database
+        // Update refreshToken di database
         await User.update({ refreshToken }, { where: { id: user.id } });
 
-        // Set refresh token in cookie
+        // Set refreshToken di cookie
         res.cookie("refreshToken", refreshToken, {
-            httpOnly: true,
-            sameSite: "none",
-            secure: true,
+            httpOnly: true, // Hanya dapat diakses oleh server
+            sameSite: "none", // Untuk cross-site request
+            secure: true, // Hanya untuk HTTPS
             maxAge: 24 * 60 * 60 * 1000,
         });
 
@@ -124,23 +136,32 @@ const loginHandler = async (req, res) => {
             accessToken,
         });
     } catch (error) {
-        res.status(500).json({ status: "Login Error: ", message: error.message });
+        res.status(500).json({
+            status: "Login Error: ",
+            message: error.message
+        });
     }
 };
 
 // LOGOUT HANDLER
 const logoutHandler = async (req, res) => {
     try {
-        const refreshToken = req.cookies.refreshToken;
-        if (!refreshToken) return res.sendStatus(204);
 
+        // Ambil refresh token dari cookie
+        const refreshToken = req.cookies.refreshToken;
+
+        // Jika tidak ada refresh token, kirim status 204
+        if (!refreshToken) return res.sendStatus(204); 
+
+        // Cari user berdasarkan refresh token
         const user = await User.findOne({
             where: { refreshToken },
         });
 
+        // Jika user tidak ditemukan, kirim status 204
         if (!user) return res.sendStatus(204);
 
-        // Clear refresh token in database
+        // Clear refreshToken di database
         await User.update(
             { refreshToken: null },
             {
@@ -152,9 +173,9 @@ const logoutHandler = async (req, res) => {
 
         // Clear cookie
         res.clearCookie("refreshToken", {
-            httpOnly: true,
-            sameSite: "none",
-            secure: true,
+            httpOnly: true, // Hanya dapat diakses oleh server
+            sameSite: "none", // Untuk cross-site request
+            secure: true, // Hanya untuk HTTPS
         });
 
         return res.status(200).json({
@@ -169,11 +190,11 @@ const logoutHandler = async (req, res) => {
     }
 };
 
-// DELETE USER ACCOUNT - TESTED
+// DELETE USER ACCOUNT
 const deleteUser = async (req, res) => {
     try {
-        const { id } = req.params;
-        const loggedInUserId = req.user.id; // From verifyToken middleware
+        const { id } = req.params; // ID user dari params
+        const loggedInUserId = req.user.id; // ID user dari middleware verifyToken
 
         // Memastikan user yang ingin dihapus adalah user yang sedang login
         if (parseInt(id) !== loggedInUserId) {
@@ -183,6 +204,7 @@ const deleteUser = async (req, res) => {
             });
         }
 
+        // Hapus user dari database
         const user = await User.findByPk(id);
         if (!user) {
             return res.status(404).json({
@@ -191,14 +213,14 @@ const deleteUser = async (req, res) => {
             });
         }
 
-        // hapus user
+        // Delete user
         await User.destroy({ where: { id } });
 
-        // Clear refresh token cookie
+        // Clear refreshToken di cookie
         res.clearCookie("refreshToken", {
-            httpOnly: true,
-            sameSite: "none",
-            secure: true,
+            httpOnly: true, // Hanya dapat diakses oleh server
+            sameSite: "none", // Untuk cross-site request
+            secure: true, // Hanya untuk HTTPS
         });
 
         res.status(200).json({
@@ -206,45 +228,49 @@ const deleteUser = async (req, res) => {
             message: "Account deleted successfully!",
         });
     } catch (error) {
-        res.status(500).json({ status: "error", message: error.message });
+        res.status(500).json({
+            status: "error", 
+            message: error.message 
+        });
     }
 };
 
-// EDIT USER ACCOUNT - TESTED
+// EDIT USER ACCOUNT
 const editUser = async (req, res) => {
     try {
-        const loggedInUserId = req.user.id; // From verifyToken middleware
-        const userToUpdate = await User.findByPk(loggedInUserId);
-        
-        if (!userToUpdate) {
+        const userId = req.user.id; // Dari middleware verifyToken
+        const { username, fullName, password } = req.body;
+
+        // Cari user berdasarkan ID
+        const user = await User.findByPk(userId);
+
+        if (!user) {
             return res.status(404).json({
                 status: "error",
                 message: "User not found",
             });
         }
 
-        const { username, fullName, password } = req.body;
-
-        let updatedFields = {};
-        if (username !== undefined) updatedFields.username = username;
-        if (fullName !== undefined) updatedFields.fullName = fullName;
-        if (password) {
-            updatedFields.password = await bcrypt.hash(password, 10);
-        }
-
-        await userToUpdate.update(updatedFields);
-
-        const updatedUser = await User.findByPk(loggedInUserId, {
-            attributes: ["id", "username", "fullName"],
+        // Update user dengan nilai baru atau pertahankan nilai lama
+        const updatedUser = await user.update({
+            username: username || user.username,
+            fullName: fullName || user.fullName,
+            password: password ? await bcrypt.hash(password, 10) : user.password
         });
+
+        // Jangan kembalikan data sensitif
+        const { password: _, refreshToken: __, ...safeUserData } = updatedUser.toJSON();
 
         res.status(200).json({
             status: "success",
             message: "User updated successfully",
-            data: updatedUser,
+            data: safeUserData
         });
     } catch (error) {
-        res.status(500).json({ status: "error", message: error.message });
+        res.status(500).json({ 
+            status: "error", 
+            message: error.message 
+        });
     }
 };
 
