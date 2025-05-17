@@ -10,19 +10,19 @@ import {
     updateNote
 } from '../controllers/note.js';
 
-// CREATE NEW NOTE (protected)
+// CREATE NEW NOTE
 router.post('/new', verifyToken, createNote);
 
-// GET ALL NOTES FOR USER (protected)
+// GET ALL NOTES BY USER
 router.get('/all', verifyToken, getAllNotes);
 
-// GET NOTE BY ID (protected)
+// GET NOTE BY ID
 router.get('/:noteId', verifyToken, getNoteById);
 
-// UPDATE NOTE (protected)
+// UPDATE NOTE
 router.put('/:noteId', verifyToken, updateNote);
 
-// DELETE NOTE (protected)
+// DELETE NOTE
 router.delete('/:noteId', verifyToken, deleteNote);
 
 export default router;

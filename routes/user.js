@@ -13,7 +13,7 @@ import {
 // ENDPOINT TOKEN REFRESH
 router.get('/refresh', refreshToken);
 
-// REGISTER NEW USER (EVERYBODY CAN SIGN UP)
+// REGISTER NEW USER
 router.post('/register', postUser);
 
 // USER LOGIN

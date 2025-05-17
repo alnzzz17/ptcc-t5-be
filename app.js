@@ -12,11 +12,11 @@ app.use(cookieParser());
 
 // CORS Configuration
 app.use(cors({
-  origin: 'https://app-t6-dot-a-11-450504.uc.r.appspot.com',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  exposedHeaders: ['Authorization']
+    origin: 'https://app-t6-dot-a-11-450504.uc.r.appspot.com',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Authorization']
 }));
 
 // Handle Preflight (OPTIONS)
@@ -38,17 +38,17 @@ app.get('/', (req, res) => {
 // Error Handling Middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).json({ 
+    res.status(500).json({
         status: "error",
-        message: "Internal Server Error" 
+        message: "Internal Server Error"
     });
 });
 
 // 404 Handler
 app.use((req, res) => {
-    res.status(404).json({ 
+    res.status(404).json({
         status: "error",
-        message: "Endpoint not found" 
+        message: "Endpoint not found"
     });
 });
 

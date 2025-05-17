@@ -5,7 +5,7 @@ import User from "../models/User.js";
 
 const verifyToken = async (req, res, next) => {
     try {
-        // Check for Authorization header
+        // Cek apakah token ada di header
         const authHeader = req.headers['authorization'] || req.headers['Authorization'];
         
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -15,17 +15,18 @@ const verifyToken = async (req, res, next) => {
             });
         }
 
-        // Extract token
+        // Extrak token
         const token = authHeader.split(' ')[1];
         
         // Verify token
         const decoded = jwt.verify(token, process.env.ACCESS_SECRET_KEY);
         
-        // Check if user still exists
+        // Cek apakah user ada di database berdasarkan id dari token
         const user = await User.findByPk(decoded.id, {
             attributes: ['id', 'username', 'fullName']
         });
         
+        // Mengembalikan error jika user tidak ditemukan
         if (!user) {
             return res.status(401).json({
                 status: "error",
@@ -33,13 +34,14 @@ const verifyToken = async (req, res, next) => {
             });
         }
 
-        // Attach user information to request object
+        // Simpan informasi user ke dalam req.user
         req.user = {
             id: user.id,
             username: user.username,
             fullName: user.fullName
         };
 
+        // Lanjutkan ke middleware berikutnya
         next();
     } catch (error) {
         // Handle token errors
